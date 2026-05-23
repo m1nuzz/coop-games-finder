@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  workflow_dispatch: # позволяет запустить вручную из вкладки Actions
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,6 +14,9 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -23,21 +26,20 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 # v4 is fine, but we set FORCE_JAVASCRIPT_ACTIONS_TO_NODE24
 
-      # Подставляем ключи из Secrets прямо в HTML
       - name: Inject API keys
         run: |
-          sed -i "s|const THEGAMESDB_KEY = '';|const THEGAMESDB_KEY = '${{ secrets.THEGAMESDB_KEY }}';|g" retro-coop-games.html
-          sed -i "s|const RAWG_KEY = '';|const RAWG_KEY = '${{ secrets.RAWG_KEY }}';|g" retro-coop-games.html
+          sed -i "s|const THEGAMESDB_KEY = '';|const THEGAMESDB_KEY = '${{ secrets.THEGAMESDB_KEY }}';|g" index.html
+          sed -i "s|const RAWG_KEY = '';|const RAWG_KEY = '${{ secrets.RAWG_KEY }}';|g" index.html
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # деплоим всю папку (там только один html)
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deploy
