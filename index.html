@@ -88,6 +88,106 @@
   }
   .key-warning.visible { display: block; }
 
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.85);
+    backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .modal-overlay.visible { display: flex; }
+  .modal-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); width: 100%; max-width: 440px;
+    padding: 2rem; box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    position: relative;
+  }
+  .modal-card h2 {
+    font-family: 'Space Mono', monospace; font-size: 1.35rem;
+    margin-bottom: .75rem; color: var(--text);
+  }
+  .modal-card p { font-size: .88rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .modal-input-group { margin-bottom: 1rem; }
+  .modal-input-group label {
+    display: block; font-size: .75rem; font-weight: 700;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: .4rem; letter-spacing: .1em;
+  }
+  .modal-card input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: .7rem 1rem;
+    font-size: .95rem; outline: none; transition: var(--transition);
+  }
+  .modal-card input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .btn-save {
+    width: 100%; background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; padding: .8rem;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    margin-top: .5rem; transition: var(--transition);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-save:hover { background: var(--accent-dim); transform: translateY(-1px); }
+
+  .btn-settings {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: .5rem .75rem; border-radius: 8px;
+    font-size: .75rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: .5rem;
+    transition: var(--transition);
+    font-family: 'DM Sans', sans-serif;
+    margin-left: auto;
+  }
+  .btn-settings:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ── Layout ── */
+
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.85);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .modal-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); width: 100%; max-width: 440px;
+    padding: 2rem; box-shadow: 0 24px 64px rgba(0,0,0,.5);
+  }
+  .modal-card h2 {
+    font-family: 'Space Mono', monospace; font-size: 1.35rem;
+    margin-bottom: .75rem; color: var(--text);
+  }
+  .modal-card p { font-size: .88rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .modal-input-group { margin-bottom: 1rem; }
+  .modal-input-group label {
+    display: block; font-size: .75rem; font-weight: 700;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: .4rem; letter-spacing: .1em;
+  }
+  .modal-card input {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    color: var(--text); border-radius: 8px; padding: .7rem 1rem;
+    font-size: .95rem; outline: none; transition: var(--transition);
+  }
+  .modal-card input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .btn-save {
+    width: 100%; background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; padding: .8rem;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
+    margin-top: .5rem; transition: var(--transition);
+  }
+  .btn-save:hover { background: var(--accent-dim); transform: translateY(-1px); }
+  
+  .btn-settings {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: .5rem .75rem; border-radius: 8px;
+    font-size: .75rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: .5rem;
+    transition: var(--transition);
+  }
+  .btn-settings:hover { border-color: var(--accent); color: var(--text); }
+
   /* ── Layout ── */
   .layout {
     max-width: 1400px; margin: 0 auto;
@@ -324,11 +424,34 @@
       <div class="logo-sub">// поиск кооперативных игр</div>
     </div>
     <div class="key-warning" id="keyWarning">
-      ⚠️ Вставьте API-ключи в начало скрипта:<br>
-      <code>THEGAMESDB_KEY</code> и <code>RAWG_KEY</code>
+      ⚠️ Настройте API-ключи для работы поиска
     </div>
+    <button class="btn-settings" id="openSettingsBtn">
+      <span>⚙️</span> Настройки
+    </button>
   </div>
 </header>
+
+<!-- ── API Keys Modal ── -->
+<div class="modal-overlay" id="keysModal">
+  <div class="modal-card">
+    <h2>Настройка API</h2>
+    <p>Введите ваши ключи. Они сохраняются <b>только</b> в вашем браузере (localStorage) и не передаются на сервер.</p>
+    
+    <div class="modal-input-group">
+      <label>TheGamesDB API Key</label>
+      <input type="password" id="tgdbInput" placeholder="Ваш ключ (api.thegamesdb.net)">
+    </div>
+    
+    <div class="modal-input-group">
+      <label>RAWG API Key</label>
+      <input type="password" id="rawgInput" placeholder="Ваш ключ (rawg.io)">
+    </div>
+    
+    <button class="btn-save" id="saveKeysBtn">💾 Сохранить и закрыть</button>
+    <button class="btn-save" id="clearKeysBtn" style="background:var(--surface); border:1px solid var(--border); margin-top:.75rem; color:var(--muted)">🗑️ Очистить ключи</button>
+  </div>
+</div>
 
 <div class="layout">
   <!-- ── Sidebar ── -->
@@ -413,10 +536,40 @@
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   TODO: Вставьте ваши API-ключи ниже
+   Управление Ключами
    ═══════════════════════════════════════════════════════ */
-const THEGAMESDB_KEY = ''; // TODO: ключ от https://api.thegamesdb.net
-const RAWG_KEY       = ''; // TODO: ключ от https://rawg.io/apidocs
+const CONFIG = {
+  tgdbKey: localStorage.getItem('THEGAMESDB_KEY') || '',
+  rawgKey: localStorage.getItem('RAWG_KEY') || ''
+};
+
+function saveKeys(tgdb, rawg) {
+  localStorage.setItem('THEGAMESDB_KEY', tgdb);
+  localStorage.setItem('RAWG_KEY', rawg);
+  CONFIG.tgdbKey = tgdb;
+  CONFIG.rawgKey = rawg;
+  updateKeyUI();
+}
+
+function clearKeys() {
+  localStorage.removeItem('THEGAMESDB_KEY');
+  localStorage.removeItem('RAWG_KEY');
+  CONFIG.tgdbKey = '';
+  CONFIG.rawgKey = '';
+  $('tgdbInput').value = '';
+  $('rawgInput').value = '';
+  updateKeyUI();
+}
+
+function updateKeyUI() {
+  if (!CONFIG.tgdbKey || !CONFIG.rawgKey) {
+    $('keyWarning').classList.add('visible');
+    $('keysModal').classList.add('visible');
+  } else {
+    $('keyWarning').classList.remove('visible');
+    $('keysModal').classList.remove('visible');
+  }
+}
 
 /* ═══════════════════════════════════════════════════════
    Константы
@@ -479,9 +632,27 @@ const sliderVal   = $('metacriticVal');
 /* ═══════════════════════════════════════════════════════
    Init
    ═══════════════════════════════════════════════════════ */
-if (!THEGAMESDB_KEY || !RAWG_KEY) keyWarning.classList.add('visible');
+updateKeyUI();
 
-/* corsproxy.io работает без ключа на github.io и localhost */
+/* Заполняем инпуты если ключи уже есть */
+$('tgdbInput').value = CONFIG.tgdbKey;
+$('rawgInput').value = CONFIG.rawgKey;
+
+/* События модалки */
+$('openSettingsBtn').addEventListener('click', () => $('keysModal').classList.add('visible'));
+$('saveKeysBtn').addEventListener('click', () => {
+  saveKeys($('tgdbInput').value.trim(), $('rawgInput').value.trim());
+});
+$('clearKeysBtn').addEventListener('click', () => {
+  if (confirm('Очистить сохранённые ключи?')) clearKeys();
+});
+
+/* Закрытие по клику вне карточки */
+$('keysModal').addEventListener('click', (e) => {
+  if (e.target === $('keysModal') && CONFIG.tgdbKey && CONFIG.rawgKey) {
+    $('keysModal').classList.remove('visible');
+  }
+});
 
 sliderInput.addEventListener('input', () => { sliderVal.textContent = sliderInput.value; });
 
@@ -500,7 +671,11 @@ btnMore.addEventListener('click', loadMore);
    Поиск
    ═══════════════════════════════════════════════════════ */
 function startSearch() {
-  if (!THEGAMESDB_KEY) { showError('Не заполнен THEGAMESDB_KEY — вставьте ключ в начало скрипта.'); return; }
+  if (!CONFIG.tgdbKey) { 
+    showError('Не настроен ключ TheGamesDB. Откройте настройки.'); 
+    $('keysModal').classList.add('visible');
+    return; 
+  }
   state.games = [];
   state.page  = 1;
   clearGrid();
@@ -572,7 +747,7 @@ async function fetchPage(page) {
 
   } catch(err) {
     removeSkeletons();
-    showError('Ошибка TheGamesDB: ' + err.message);
+    showError('Ошибка API: ' + err.message);
     console.error(err);
   } finally {
     state.loading = false;
@@ -586,33 +761,30 @@ async function fetchPage(page) {
    ═══════════════════════════════════════════════════════ */
 async function fetchTGDB(params, page) {
   const url = new URL(`${TGDB_BASE}/Games/ByGameName`);
-  url.searchParams.set('apikey', THEGAMESDB_KEY);
-  url.searchParams.set('name',   params.name || 'a'); // TGDB требует name
+  url.searchParams.set('apikey', CONFIG.tgdbKey);
+  url.searchParams.set('name',   params.name || 'a'); 
   url.searchParams.set('page',   page);
   url.searchParams.set('fields', 'players,release_date,genres,overview');
   url.searchParams.set('include','boxart');
 
   if (params.platform_id) url.searchParams.set('filter[platform]', params.platform_id);
 
-  /* Если платформа не выбрана — берём все ретро платформы */
   if (!params.platform_id) {
     url.searchParams.set('filter[platform]', Object.keys(PLATFORM_MAP).join(','));
   }
 
-  /* Оборачиваем через corsproxy.io — TheGamesDB блокирует прямые браузерные запросы */
   const proxyUrl = CORS_PROXY_BASE + encodeURIComponent(url.toString());
   const res = await fetch(proxyUrl);
   if (!res.ok) {
     const txt = await res.text();
-    throw new Error(`HTTP ${res.status}: ${txt.slice(0,200)}`);
+    throw new Error(`TheGamesDB HTTP ${res.status}`);
   }
   const json = await res.json();
-  if (json.status !== 'Success') throw new Error(json.status || 'Неизвестная ошибка TGDB');
+  if (json.status !== 'Success') throw new Error(json.status || 'Ошибка TGDB');
 
   const data = json.data;
   state.totalPages = Math.ceil((data.count || 0) / PAGE_SIZE);
 
-  /* Boxart */
   const boxartMap = {};
   if (json.include?.boxart?.data) {
     const ba = json.include.boxart.data;
@@ -624,7 +796,6 @@ async function fetchTGDB(params, page) {
     }
   }
 
-  /* Фильтр по годам на клиенте */
   const yFrom = parseInt($('yearFrom').value) || 0;
   const yTo   = parseInt($('yearTo').value)   || 9999;
 
@@ -635,17 +806,14 @@ async function fetchTGDB(params, page) {
   }).map(g => ({ ...g, _thumb: boxartMap[String(g.id)] || null }));
 }
 
-/* ═══════════════════════════════════════════════════════
-   API: RAWG (батч с Promise.allSettled)
-   ═══════════════════════════════════════════════════════ */
 async function fetchRAWGBatch(titles) {
-  if (!RAWG_KEY) return {};
+  if (!CONFIG.rawgKey) return {};
   const map = {};
   const requests = titles.map(async title => {
     try {
-      const url = `${RAWG_BASE}/games?key=${RAWG_KEY}&search=${encodeURIComponent(title)}&page_size=1`;
+      const url = `${RAWG_BASE}/games?key=${CONFIG.rawgKey}&search=${encodeURIComponent(title)}&page_size=1`;
       const res = await fetch(url);
-      if (res.status === 429) return; // rate limit — молча пропускаем
+      if (res.status === 429) return; 
       if (!res.ok) return;
       const json = await res.json();
       const g = json.results?.[0];
@@ -657,7 +825,7 @@ async function fetchRAWGBatch(titles) {
           tags:             (g.tags || []).map(t => t.slug),
         };
       }
-    } catch { /* RAWG не найден — не ломаем UI */ }
+    } catch { }
   });
   await Promise.allSettled(requests);
   return map;
