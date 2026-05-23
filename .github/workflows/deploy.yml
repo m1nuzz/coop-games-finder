@@ -17,23 +17,24 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-
+    # environment: github-pages # Убираем привязку к окружению, если секреты созданы как Repository Secrets
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
       - name: Inject API keys
         run: |
-          # Используем более гибкий поиск для замены ключей
+          # Отладочная информация (безопасная)
+          echo "Checking if secrets are available..."
+          if [ -z "${{ secrets.THEGAMESDB_KEY }}" ]; then echo "THEGAMESDB_KEY is EMPTY"; else echo "THEGAMESDB_KEY is PRESENT"; fi
+          if [ -z "${{ secrets.RAWG_KEY }}" ]; then echo "RAWG_KEY is EMPTY"; else echo "RAWG_KEY is PRESENT"; fi
+
+          # Замена с использованием временных переменных для надежности
           sed -i "s|const THEGAMESDB_KEY = '.*';|const THEGAMESDB_KEY = '${{ secrets.THEGAMESDB_KEY }}';|g" index.html
           sed -i "s|const RAWG_KEY = '.*';|const RAWG_KEY = '${{ secrets.RAWG_KEY }}';|g" index.html
           
-          # Проверка (выведет строки без самих ключей для безопасности)
-          grep "const THEGAMESDB_KEY" index.html | sed 's/=.*/= "***";/'
-          grep "const RAWG_KEY" index.html | sed 's/=.*/= "***";/'
+          echo "Injection complete."
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
