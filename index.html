@@ -88,6 +88,17 @@
   }
   .key-warning.visible { display: block; }
 
+  .btn-settings {
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--muted); padding: .5rem .75rem; border-radius: 8px;
+    font-size: .75rem; font-weight: 600; cursor: pointer;
+    display: flex; align-items: center; gap: .5rem;
+    transition: var(--transition);
+    font-family: 'DM Sans', sans-serif;
+    margin-left: auto;
+  }
+  .btn-settings:hover { border-color: var(--accent); color: var(--text); }
+
   /* ── Modal ── */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 9999;
@@ -128,65 +139,6 @@
     font-family: 'DM Sans', sans-serif;
   }
   .btn-save:hover { background: var(--accent-dim); transform: translateY(-1px); }
-
-  .btn-settings {
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--muted); padding: .5rem .75rem; border-radius: 8px;
-    font-size: .75rem; font-weight: 600; cursor: pointer;
-    display: flex; align-items: center; gap: .5rem;
-    transition: var(--transition);
-    font-family: 'DM Sans', sans-serif;
-    margin-left: auto;
-  }
-  .btn-settings:hover { border-color: var(--accent); color: var(--text); }
-
-  /* ── Layout ── */
-
-  .modal-overlay {
-    position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0,0,0,.85);
-    backdrop-filter: blur(8px);
-    display: flex; align-items: center; justify-content: center;
-    padding: 1.5rem;
-  }
-  .modal-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); width: 100%; max-width: 440px;
-    padding: 2rem; box-shadow: 0 24px 64px rgba(0,0,0,.5);
-  }
-  .modal-card h2 {
-    font-family: 'Space Mono', monospace; font-size: 1.35rem;
-    margin-bottom: .75rem; color: var(--text);
-  }
-  .modal-card p { font-size: .88rem; color: var(--muted); margin-bottom: 1.5rem; }
-  .modal-input-group { margin-bottom: 1rem; }
-  .modal-input-group label {
-    display: block; font-size: .75rem; font-weight: 700;
-    text-transform: uppercase; color: var(--accent);
-    margin-bottom: .4rem; letter-spacing: .1em;
-  }
-  .modal-card input {
-    width: 100%; background: var(--card); border: 1px solid var(--border);
-    color: var(--text); border-radius: 8px; padding: .7rem 1rem;
-    font-size: .95rem; outline: none; transition: var(--transition);
-  }
-  .modal-card input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-  .btn-save {
-    width: 100%; background: var(--accent); color: #fff;
-    border: none; border-radius: 8px; padding: .8rem;
-    font-size: 1rem; font-weight: 600; cursor: pointer;
-    margin-top: .5rem; transition: var(--transition);
-  }
-  .btn-save:hover { background: var(--accent-dim); transform: translateY(-1px); }
-  
-  .btn-settings {
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--muted); padding: .5rem .75rem; border-radius: 8px;
-    font-size: .75rem; font-weight: 600; cursor: pointer;
-    display: flex; align-items: center; gap: .5rem;
-    transition: var(--transition);
-  }
-  .btn-settings:hover { border-color: var(--accent); color: var(--text); }
 
   /* ── Layout ── */
   .layout {
@@ -436,16 +388,16 @@
 <div class="modal-overlay" id="keysModal">
   <form class="modal-card" id="keysForm">
     <h2>Настройка API</h2>
-    <p>Введите ваши ключи. Они сохраняются <b>только</b> в вашем браузере (localStorage) и не передаются на сервер.</p>
+    <p>Введите ваши ключи. Они сохраняются <b>только</b> в вашем браузере (localStorage).</p>
     
     <div class="modal-input-group">
       <label for="tgdbInput">TheGamesDB API Key</label>
-      <input type="password" id="tgdbInput" placeholder="Ваш ключ (api.thegamesdb.net)" required>
+      <input type="password" id="tgdbInput" placeholder="Ваш ключ (api.thegamesdb.net)" required autocomplete="current-password">
     </div>
     
     <div class="modal-input-group">
       <label for="rawgInput">RAWG API Key</label>
-      <input type="password" id="rawgInput" placeholder="Ваш ключ (rawg.io)" required>
+      <input type="password" id="rawgInput" placeholder="Ваш ключ (rawg.io)" required autocomplete="current-password">
     </div>
     
     <button type="submit" class="btn-save">💾 Сохранить и закрыть</button>
@@ -454,10 +406,8 @@
 </div>
 
 <div class="layout">
-  <!-- ── Sidebar ── -->
   <aside>
     <div class="sidebar-title">// Фильтры</div>
-
     <div class="filter-group">
       <label class="filter-label" for="platform">Платформа</label>
       <select id="platform">
@@ -472,7 +422,6 @@
         <option value="4">GBA</option>
       </select>
     </div>
-
     <div class="filter-group">
       <label class="filter-label">Год выхода</label>
       <div class="year-row">
@@ -480,14 +429,11 @@
         <input type="number" id="yearTo"   placeholder="по" value="2005" min="1975" max="2010">
       </div>
     </div>
-
     <div class="filter-group">
       <label class="filter-label">Мин. игроков</label>
       <input type="number" id="minPlayers" placeholder="1" value="1" min="1" max="8">
     </div>
-
     <div class="divider"></div>
-
     <div class="filter-group">
       <label class="filter-label">Metacritic не ниже</label>
       <div class="slider-wrap">
@@ -495,7 +441,6 @@
         <input type="range" id="metacriticMin" min="0" max="100" value="0">
       </div>
     </div>
-
     <div class="filter-group">
       <label class="filter-label" for="sortBy">Сортировка</label>
       <select id="sortBy">
@@ -506,20 +451,16 @@
         <option value="name_asc">Название А–Я</option>
       </select>
     </div>
-
     <button class="btn-search" id="btnSearch">🎮 Найти игры</button>
   </aside>
 
-  <!-- ── Main ── -->
   <main>
     <div class="error-banner" id="errorBanner">
       <span>❌</span><span id="errorText"></span>
     </div>
-
     <div class="results-header">
       <div class="results-count" id="resultsCount">Введите параметры и нажмите «Найти»</div>
     </div>
-
     <div class="games-grid" id="gamesGrid">
       <div class="empty-state visible" id="emptyState">
         <div class="empty-icon">🕹️</div>
@@ -527,7 +468,6 @@
         <div class="empty-sub">Настройте фильтры и нажмите «Найти игры»</div>
       </div>
     </div>
-
     <div class="load-more-wrap">
       <button class="btn-more" id="btnMore">Загрузить ещё</button>
     </div>
@@ -536,12 +476,35 @@
 
 <script>
 /* ═══════════════════════════════════════════════════════
-   Управление Ключами
+   State & Config
    ═══════════════════════════════════════════════════════ */
 const CONFIG = {
   tgdbKey: localStorage.getItem('THEGAMESDB_KEY') || '',
   rawgKey: localStorage.getItem('RAWG_KEY') || ''
 };
+
+let state = {
+  games:      [],
+  page:       1,
+  totalPages: 1,
+  loading:    false,
+};
+
+const $ = id => document.getElementById(id);
+
+/* ═══════════════════════════════════════════════════════
+   UI Management
+   ═══════════════════════════════════════════════════════ */
+function updateKeyUI() {
+  const isMissing = !CONFIG.tgdbKey || !CONFIG.rawgKey;
+  if (isMissing) {
+    $('keyWarning').classList.add('visible');
+    $('keysModal').classList.add('visible');
+  } else {
+    $('keyWarning').classList.remove('visible');
+    $('keysModal').classList.remove('visible');
+  }
+}
 
 function saveKeys(tgdb, rawg) {
   localStorage.setItem('THEGAMESDB_KEY', tgdb);
@@ -561,138 +524,87 @@ function clearKeys() {
   updateKeyUI();
 }
 
-function updateKeyUI() {
-  if (!CONFIG.tgdbKey || !CONFIG.rawgKey) {
-    $('keyWarning').classList.add('visible');
-    $('keysModal').classList.add('visible');
-  } else {
-    $('keyWarning').classList.remove('visible');
-    $('keysModal').classList.remove('visible');
-  }
-}
-
 /* ═══════════════════════════════════════════════════════
-   Константы
+   API Constants
    ═══════════════════════════════════════════════════════ */
-/* TheGamesDB не поддерживает CORS — запросы идут через corsproxy.io.
-   Бесплатно без ключа для: localhost, github.io, CodePen и др.
-   Документация: https://corsproxy.io */
 const CORS_PROXY_BASE = 'https://corsproxy.io/?url=';
-
 const TGDB_BASE  = 'https://api.thegamesdb.net/v1';
 const RAWG_BASE  = 'https://api.rawg.io/api';
 const PAGE_SIZE  = 20;
 
-/* Соответствие ID → читаемое название + CSS-класс */
 const PLATFORM_MAP = {
-  '7':  { name: 'NES',          cls: 'nes'     },
-  '6':  { name: 'SNES',         cls: 'snes'    },
-  '36': { name: 'Sega Genesis',  cls: 'genesis' },
-  '2':  { name: 'Arcade',        cls: 'arcade'  },
-  '10': { name: 'PS1',           cls: 'ps1'     },
-  '11': { name: 'PS2',           cls: 'ps2'     },
-  '3':  { name: 'N64',           cls: 'n64'     },
-  '4':  { name: 'GBA',           cls: 'gba'     },
+  '7':  { name: 'NES', cls: 'nes' },
+  '6':  { name: 'SNES', cls: 'snes' },
+  '36': { name: 'Sega Genesis', cls: 'genesis' },
+  '2':  { name: 'Arcade', cls: 'arcade' },
+  '10': { name: 'PS1', cls: 'ps1' },
+  '11': { name: 'PS2', cls: 'ps2' },
+  '3':  { name: 'N64', cls: 'n64' },
+  '4':  { name: 'GBA', cls: 'gba' },
 };
 
-/* Маппинг тегов кооператива */
 const COOP_TAGS = ['co-op', 'local co-op', 'online co-op', 'split screen', 'multiplayer'];
 const COOP_LABELS = {
-  'local co-op':  '🏠 Local Co-op',
+  'local co-op': '🏠 Local Co-op',
   'online co-op': '🌐 Online Co-op',
   'split screen': '📺 Split-screen',
-  'co-op':        '🤝 Co-op',
+  'co-op': '🤝 Co-op',
 };
 
 /* ═══════════════════════════════════════════════════════
-   Состояние
-   ═══════════════════════════════════════════════════════ */
-let state = {
-  games:      [],   // объединённые карточки
-  page:       1,
-  totalPages: 1,
-  loading:    false,
-};
-
-/* ═══════════════════════════════════════════════════════
-   DOM
-   ═══════════════════════════════════════════════════════ */
-const $ = id => document.getElementById(id);
-const grid        = $('gamesGrid');
-const emptyState  = $('emptyState');
-const errorBanner = $('errorBanner');
-const errorText   = $('errorText');
-const countEl     = $('resultsCount');
-const btnMore     = $('btnMore');
-const btnSearch   = $('btnSearch');
-const keyWarning  = $('keyWarning');
-const sliderInput = $('metacriticMin');
-const sliderVal   = $('metacriticVal');
-
-/* ═══════════════════════════════════════════════════════
-   Init
+   Initialization
    ═══════════════════════════════════════════════════════ */
 updateKeyUI();
-
-/* Заполняем инпуты если ключи уже есть */
 $('tgdbInput').value = CONFIG.tgdbKey;
 $('rawgInput').value = CONFIG.rawgKey;
 
-/* События модалки */
 $('openSettingsBtn').addEventListener('click', () => $('keysModal').classList.add('visible'));
 
 $('keysForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const tgdb = $('tgdbInput').value.trim();
   const rawg = $('rawgInput').value.trim();
-  
   if (tgdb && rawg) {
     saveKeys(tgdb, rawg);
-    $('keysModal').classList.remove('visible');
-    // Опционально: запускаем поиск сразу после сохранения
     if (state.games.length === 0) startSearch();
-  } else {
-    alert('Пожалуйста, введите оба ключа');
   }
 });
 
 $('clearKeysBtn').addEventListener('click', () => {
-  if (confirm('Очистить сохранённые ключи?')) {
-    clearKeys();
-  }
+  if (confirm('Очистить сохранённые ключи?')) clearKeys();
 });
 
-/* Закрытие по клику вне карточки */
 $('keysModal').addEventListener('click', (e) => {
   if (e.target === $('keysModal') && CONFIG.tgdbKey && CONFIG.rawgKey) {
     $('keysModal').classList.remove('visible');
   }
 });
 
-sliderInput.addEventListener('input', () => { sliderVal.textContent = sliderInput.value; });
+$('metacriticMin').addEventListener('input', () => { $('metacriticVal').textContent = $('metacriticMin').value; });
 
-/* Debounce */
-let debTimer;
-const debounce = (fn, ms) => (...args) => { clearTimeout(debTimer); debTimer = setTimeout(() => fn(...args), ms); };
+const debounce = (fn, ms) => {
+  let timer;
+  return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), ms); };
+};
 
-/* Авто-поиск при изменении фильтров */
 ['platform','yearFrom','yearTo','minPlayers','metacriticMin','sortBy'].forEach(id => {
   $(id).addEventListener('change', debounce(startSearch, 400));
 });
-btnSearch.addEventListener('click', startSearch);
-btnMore.addEventListener('click', loadMore);
+
+$('btnSearch').addEventListener('click', startSearch);
+$('btnMore').addEventListener('click', loadMore);
 
 /* ═══════════════════════════════════════════════════════
-   Поиск
+   Search Logic
    ═══════════════════════════════════════════════════════ */
 function startSearch() {
-  if (!CONFIG.tgdbKey) { 
-    showError('Не настроен ключ TheGamesDB. Откройте настройки.'); 
+  if (!CONFIG.tgdbKey) {
+    showError('Не настроен ключ TheGamesDB.');
     $('keysModal').classList.add('visible');
-    return; 
+    return;
   }
   state.games = [];
-  state.page  = 1;
+  state.page = 1;
   clearGrid();
   hideError();
   fetchPage(1);
@@ -706,15 +618,18 @@ async function loadMore() {
 
 async function fetchPage(page) {
   state.loading = true;
-  btnMore.classList.remove('visible');
-  btnSearch.disabled = true;
-  btnSearch.textContent = '⏳ Загрузка…';
+  $('btnMore').classList.remove('visible');
+  $('btnSearch').disabled = true;
+  $('btnSearch').textContent = '⏳ Загрузка…';
   showSkeletons();
 
-  const params = getFilterParams();
-
   try {
-    /* ── 1. TheGamesDB ── */
+    const params = {
+      platform_id: $('platform').value,
+      year_from: $('yearFrom').value,
+      year_to: $('yearTo').value,
+    };
+
     const tgdbGames = await fetchTGDB(params, page);
     if (!tgdbGames || tgdbGames.length === 0) {
       removeSkeletons();
@@ -723,27 +638,24 @@ async function fetchPage(page) {
       return;
     }
 
-    /* ── 2. RAWG (параллельно) ── */
     const rawgMap = await fetchRAWGBatch(tgdbGames.map(g => g.game_title));
 
-    /* ── 3. Объединяем ── */
     const merged = tgdbGames.map(g => {
       const r = rawgMap[normalizeTitle(g.game_title)] || {};
       return {
-        id:          g.id,
-        title:       g.game_title,
-        year:        g.release_date ? g.release_date.slice(0, 4) : null,
+        id: g.id,
+        title: g.game_title,
+        year: g.release_date ? g.release_date.slice(0, 4) : null,
         platform_id: String(g.platform),
-        players:     extractPlayers(g),
-        coopType:    extractCoop(r.tags || []),
-        thumb:       extractThumb(g),
-        metacritic:  r.metacritic ?? null,
+        players: extractPlayers(g),
+        coopType: extractCoop(r.tags || []),
+        thumb: g._thumb || null,
+        metacritic: r.metacritic ?? null,
         description: r.description_raw || null,
       };
     });
 
-    /* ── 4. Применяем client-side фильтры ── */
-    const minMeta  = parseInt($('metacriticMin').value) || 0;
+    const minMeta = parseInt($('metacriticMin').value) || 0;
     const minPlayers = parseInt($('minPlayers').value) || 1;
 
     const filtered = merged.filter(g => {
@@ -754,48 +666,35 @@ async function fetchPage(page) {
 
     state.games.push(...filtered);
     sortGames();
-
     removeSkeletons();
     renderCards(filtered);
     updateCount();
-    if (state.page < state.totalPages) btnMore.classList.add('visible');
+    if (state.page < state.totalPages) $('btnMore').classList.add('visible');
 
-  } catch(err) {
+  } catch (err) {
     removeSkeletons();
     showError('Ошибка API: ' + err.message);
-    console.error(err);
   } finally {
     state.loading = false;
-    btnSearch.disabled = false;
-    btnSearch.textContent = '🎮 Найти игры';
+    $('btnSearch').disabled = false;
+    $('btnSearch').textContent = '🎮 Найти игры';
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   API: TheGamesDB
-   ═══════════════════════════════════════════════════════ */
 async function fetchTGDB(params, page) {
   const url = new URL(`${TGDB_BASE}/Games/ByGameName`);
   url.searchParams.set('apikey', CONFIG.tgdbKey);
-  url.searchParams.set('name',   params.name || 'a'); 
-  url.searchParams.set('page',   page);
+  url.searchParams.set('name', params.name || 'a');
+  url.searchParams.set('page', page);
   url.searchParams.set('fields', 'players,release_date,genres,overview');
-  url.searchParams.set('include','boxart');
-
+  url.searchParams.set('include', 'boxart');
   if (params.platform_id) url.searchParams.set('filter[platform]', params.platform_id);
+  else url.searchParams.set('filter[platform]', Object.keys(PLATFORM_MAP).join(','));
 
-  if (!params.platform_id) {
-    url.searchParams.set('filter[platform]', Object.keys(PLATFORM_MAP).join(','));
-  }
-
-  const proxyUrl = CORS_PROXY_BASE + encodeURIComponent(url.toString());
-  const res = await fetch(proxyUrl);
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(`TheGamesDB HTTP ${res.status}`);
-  }
+  const res = await fetch(CORS_PROXY_BASE + encodeURIComponent(url.toString()));
+  if (!res.ok) throw new Error(`TGDB HTTP ${res.status}`);
   const json = await res.json();
-  if (json.status !== 'Success') throw new Error(json.status || 'Ошибка TGDB');
+  if (json.status !== 'Success') throw new Error(json.status);
 
   const data = json.data;
   state.totalPages = Math.ceil((data.count || 0) / PAGE_SIZE);
@@ -812,11 +711,11 @@ async function fetchTGDB(params, page) {
   }
 
   const yFrom = parseInt($('yearFrom').value) || 0;
-  const yTo   = parseInt($('yearTo').value)   || 9999;
+  const yTo = parseInt($('yearTo').value) || 9999;
 
   return (data.games || []).filter(g => {
     if (!g.release_date) return true;
-    const y = parseInt(g.release_date.slice(0,4));
+    const y = parseInt(g.release_date.slice(0, 4));
     return y >= yFrom && y <= yTo;
   }).map(g => ({ ...g, _thumb: boxartMap[String(g.id)] || null }));
 }
@@ -828,19 +727,17 @@ async function fetchRAWGBatch(titles) {
     try {
       const url = `${RAWG_BASE}/games?key=${CONFIG.rawgKey}&search=${encodeURIComponent(title)}&page_size=1`;
       const res = await fetch(url);
-      if (res.status === 429) return; 
       if (!res.ok) return;
       const json = await res.json();
       const g = json.results?.[0];
       if (g) {
-        const key = normalizeTitle(title);
-        map[key] = {
-          metacritic:       g.metacritic ?? null,
-          description_raw:  g.description_raw || null,
-          tags:             (g.tags || []).map(t => t.slug),
+        map[normalizeTitle(title)] = {
+          metacritic: g.metacritic ?? null,
+          description_raw: g.description_raw || null,
+          tags: (g.tags || []).map(t => t.slug),
         };
       }
-    } catch { }
+    } catch {}
   });
   await Promise.allSettled(requests);
   return map;
@@ -850,51 +747,27 @@ async function fetchRAWGBatch(titles) {
    Helpers
    ═══════════════════════════════════════════════════════ */
 function normalizeTitle(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, ''); }
-
-function getFilterParams() {
-  return {
-    platform_id: $('platform').value,
-    year_from:   $('yearFrom').value,
-    year_to:     $('yearTo').value,
-  };
-}
-
 function extractPlayers(g) {
   if (!g.players) return null;
   const m = String(g.players).match(/\d+/g);
-  if (!m) return null;
-  return Math.max(...m.map(Number));
+  return m ? Math.max(...m.map(Number)) : null;
 }
-
 function extractCoop(tags) {
-  for (const t of COOP_TAGS) {
-    if (tags.includes(t)) return COOP_LABELS[t] || null;
-  }
+  for (const t of COOP_TAGS) if (tags.includes(t)) return COOP_LABELS[t] || null;
   return null;
 }
-
-function extractThumb(g) { return g._thumb || null; }
-
 function scoreClass(n) {
   if (n === null) return 'score-none';
-  if (n >= 75)   return 'score-green';
-  if (n >= 50)   return 'score-yellow';
-  return 'score-red';
+  return n >= 75 ? 'score-green' : (n >= 50 ? 'score-yellow' : 'score-red');
 }
-
-function platformInfo(id) {
-  return PLATFORM_MAP[id] || { name: 'Другое', cls: 'other' };
-}
-
 function sortGames() {
   const by = $('sortBy').value;
   state.games.sort((a, b) => {
     if (by === 'metacritic_desc') return (b.metacritic ?? -1) - (a.metacritic ?? -1);
-    if (by === 'year_desc')       return (b.year ?? 0) - (a.year ?? 0);
-    if (by === 'year_asc')        return (a.year ?? 9999) - (b.year ?? 9999);
-    if (by === 'players_desc')    return (b.players ?? 0) - (a.players ?? 0);
-    if (by === 'name_asc')        return a.title.localeCompare(b.title, 'ru');
-    return 0;
+    if (by === 'year_desc') return (b.year ?? 0) - (a.year ?? 0);
+    if (by === 'year_asc') return (a.year ?? 9999) - (b.year ?? 9999);
+    if (by === 'players_desc') return (b.players ?? 0) - (a.players ?? 0);
+    return a.title.localeCompare(b.title, 'ru');
   });
 }
 
@@ -902,87 +775,49 @@ function sortGames() {
    Render
    ═══════════════════════════════════════════════════════ */
 function renderCards(games) {
-  emptyState.classList.remove('visible');
-  if (games.length === 0 && state.games.length === 0) { showEmpty(); return; }
-
+  $('emptyState').classList.remove('visible');
   games.forEach((g, i) => {
-    const pInfo = platformInfo(g.platform_id);
-    const score = g.metacritic;
-    const scoreLabel = score !== null ? score : '—';
-
+    const pInfo = PLATFORM_MAP[g.platform_id] || { name: 'Другое', cls: 'other' };
     const card = document.createElement('div');
     card.className = 'card';
     card.style.animationDelay = `${(i % PAGE_SIZE) * 30}ms`;
-
     card.innerHTML = `
-      ${g.thumb
-        ? `<img class="card-thumb" src="${g.thumb}" alt="${escHtml(g.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        : ''}
+      ${g.thumb ? `<img class="card-thumb" src="${g.thumb}" alt="${escHtml(g.title)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
       <div class="card-thumb-placeholder" style="display:${g.thumb ? 'none' : 'flex'}">🕹️</div>
       <div class="card-body">
         <div class="card-title">${escHtml(g.title)}</div>
         <div class="card-meta">
           <span class="badge badge-${pInfo.cls}">${pInfo.name}</span>
           ${g.year ? `<span class="card-year">${g.year}</span>` : ''}
-          <span class="card-score ${scoreClass(score)}">${scoreLabel}</span>
+          <span class="card-score ${scoreClass(g.metacritic)}">${g.metacritic ?? '—'}</span>
         </div>
-        ${g.players ? `<div class="card-players">👥 до ${g.players} ${plural(g.players, 'игрока','игроков','игроков')}</div>` : ''}
+        ${g.players ? `<div class="card-players">👥 до ${g.players} игроков</div>` : ''}
         ${g.coopType ? `<div class="card-coop">${g.coopType}</div>` : ''}
         ${g.description ? `<div class="card-desc">${escHtml(g.description.slice(0,150))}…</div>` : ''}
       </div>`;
-    grid.appendChild(card);
+    $('gamesGrid').appendChild(card);
   });
 }
 
-function showSkeletons(count = 8) {
-  for (let i = 0; i < count; i++) {
+function showSkeletons() {
+  for (let i = 0; i < 8; i++) {
     const s = document.createElement('div');
     s.className = 'skeleton skel-card';
-    s.innerHTML = `
-      <div class="skeleton-thumb skel"></div>
-      <div class="skeleton-body">
-        <div class="skel skel-title"></div>
-        <div class="skel skel-sub"></div>
-        <div class="skel skel-score"></div>
-      </div>`;
-    grid.appendChild(s);
+    s.innerHTML = '<div class="skeleton-thumb skel"></div><div class="skeleton-body"><div class="skel skel-title"></div><div class="skel skel-sub"></div><div class="skel skel-score"></div></div>';
+    $('gamesGrid').appendChild(s);
   }
 }
 
-function removeSkeletons() {
-  grid.querySelectorAll('.skel-card').forEach(el => el.remove());
-}
-
-function clearGrid() {
-  grid.innerHTML = '';
-  grid.appendChild(emptyState);
-  emptyState.classList.remove('visible');
-  btnMore.classList.remove('visible');
-}
-
-function showEmpty() { emptyState.classList.add('visible'); }
-function showError(msg) { errorText.textContent = msg; errorBanner.classList.add('visible'); }
-function hideError() { errorBanner.classList.remove('visible'); }
-
+function removeSkeletons() { document.querySelectorAll('.skel-card').forEach(el => el.remove()); }
+function clearGrid() { $('gamesGrid').innerHTML = ''; $('gamesGrid').appendChild($('emptyState')); $('emptyState').classList.remove('visible'); }
+function showEmpty() { $('emptyState').classList.add('visible'); }
+function showError(msg) { $('errorText').textContent = msg; $('errorBanner').classList.add('visible'); }
+function hideError() { $('errorBanner').classList.remove('visible'); }
 function updateCount() {
   const n = state.games.length;
-  countEl.innerHTML = n > 0
-    ? `Найдено: <strong>${n}</strong> игр${n === 1 ? 'а' : ''}`
-    : 'Ничего не найдено';
+  $('resultsCount').innerHTML = n > 0 ? `Найдено: <strong>${n}</strong> игр` : 'Ничего не найдено';
 }
-
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-function plural(n, one, few, many) {
-  const mod10 = n % 10, mod100 = n % 100;
-  if (mod10 === 1 && mod100 !== 11) return one;
-  if ([2,3,4].includes(mod10) && ![12,13,14].includes(mod100)) return few;
-  return many;
-}
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 </script>
 </body>
 </html>
