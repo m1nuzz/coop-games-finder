@@ -812,7 +812,10 @@ function showSkeletons() {
 }
 
 function removeSkeletons() { document.querySelectorAll('.skel-card').forEach(el => el.remove()); }
-function clearGrid() { $('gamesGrid').innerHTML = ''; $('gamesGrid').appendChild($('emptyState')); $('emptyState').classList.remove('visible'); }
+function clearGrid() { 
+  $('gamesGrid').innerHTML = ''; 
+  $('emptyState').classList.remove('visible'); 
+}
 function showEmpty() { $('emptyState').classList.add('visible'); }
 function showError(msg) { $('errorText').textContent = msg; $('errorBanner').classList.add('visible'); }
 function hideError() { $('errorBanner').classList.remove('visible'); }
