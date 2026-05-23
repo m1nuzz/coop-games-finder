@@ -189,7 +189,7 @@
 </div>
 
 <script>
-/** ── Config ── **/
+/** ── Config & State ── **/
 const CONFIG = {
   tgdb: localStorage.getItem('THEGAMESDB_KEY') || '',
   rawg: localStorage.getItem('RAWG_KEY') || ''
@@ -201,6 +201,13 @@ const PROXY = 'https://corsproxy.io/?url=';
 
 const PLATFORMS = {
   '7': 'NES', '6': 'SNES', '36': 'Genesis', '2': 'Arcade', '10': 'PS1', '11': 'PS2', '3': 'N64', '4': 'GBA'
+};
+
+let state = {
+  currentPage: 1,
+  totalFound: 0,
+  isLoading: false,
+  allGames: []
 };
 
 /** ── UI ── **/
@@ -224,58 +231,82 @@ $('clearKeys').onclick = () => { if(confirm('Удалить ключи?')) { loc
 $('openSettings').onclick = () => toggleModal(true);
 
 /** ── Core Engine ── **/
-let isLoading = false;
 
-$('searchBtn').onclick = async () => {
-  if (isLoading) return;
+$('searchBtn').onclick = () => startSearch(true);
+
+async function startSearch(isNew = true) {
+  if (state.isLoading) return;
+  
+  if (isNew) {
+    state.currentPage = 1;
+    state.allGames = [];
+    $('gameGrid').innerHTML = '';
+    updateInfo('Начинаем поиск...');
+  }
+
   const title = $('searchTitle').value.trim();
   const platform = $('platform').value;
   const minPlayers = parseInt($('minPlayers').value) || 1;
   const yFrom = parseInt($('yearFrom').value) || 0;
   const yTo = parseInt($('yearTo').value) || 9999;
 
-  startLoading();
+  setLoading(true);
   
   try {
-    // 1. Fetch from TheGamesDB
-    let tgdbUrl = title 
-      ? `${TGDB_BASE}/Games/ByGameName?name=${encodeURIComponent(title)}`
-      : `${TGDB_BASE}/Games/ByPlatformID?id=${platform || Object.keys(PLATFORMS).join(',')}`;
-    
-    tgdbUrl += `&apikey=${CONFIG.tgdb}&fields=players,release_date&include=boxart`;
-    
-    const res = await fetch(PROXY + encodeURIComponent(tgdbUrl));
-    const json = await res.json();
-    if (json.status !== 'Success') throw new Error(json.status);
+    let foundInThisBatch = 0;
+    let pagesChecked = 0;
+    const MAX_PAGES_TO_SCAN = 5; // Сколько страниц проверять за раз
 
-    const rawGames = json.data.games || [];
-    const boxartData = json.include?.boxart || {};
+    while (foundInThisBatch < 10 && pagesChecked < MAX_PAGES_TO_SCAN) {
+      updateInfo(`Сканируем страницу ${state.currentPage} из базы... (Найдено: ${state.allGames.length})`);
+      
+      let tgdbUrl = title 
+        ? `${TGDB_BASE}/Games/ByGameName?name=${encodeURIComponent(title)}&page=${state.currentPage}`
+        : `${TGDB_BASE}/Games/ByPlatformID?id=${platform || Object.keys(PLATFORMS).join(',')}&page=${state.currentPage}`;
+      
+      tgdbUrl += `&apikey=${CONFIG.tgdb}&fields=players,release_date&include=boxart`;
+      
+      const res = await fetch(PROXY + encodeURIComponent(tgdbUrl));
+      const json = await res.json();
+      if (json.status !== 'Success') break;
 
-    // 2. Filter accurately by players and dates
-    const filtered = rawGames.filter(g => {
-      const p = extractPlayers(g.players);
-      const y = g.release_date ? parseInt(g.release_date.slice(0,4)) : 0;
-      return p >= minPlayers && y >= yFrom && y <= yTo;
-    });
+      const rawGames = json.data.games || [];
+      if (rawGames.length === 0) break;
 
-    // 3. Map to clean objects
-    const games = filtered.map(g => {
-      const thumb = findThumb(g.id, boxartData);
-      return { id: g.id, title: g.game_title, players: extractPlayers(g.players), platform: g.platform, year: g.release_date?.slice(0,4), thumb };
-    });
+      const boxartData = json.include?.boxart || {};
 
-    renderInitial(games);
-    updateInfo(`Найдено ${games.length} игр. Загружаем детали...`);
+      // Фильтрация
+      const filtered = rawGames.filter(g => {
+        const p = extractPlayers(g.players);
+        const y = g.release_date ? parseInt(g.release_date.slice(0,4)) : 0;
+        return p >= minPlayers && y >= yFrom && y <= yTo;
+      });
 
-    // 4. Enrich with RAWG in background
-    enrichGames(games);
+      const mapped = filtered.map(g => {
+        const thumb = findThumb(g.id, boxartData);
+        return { id: g.id, title: g.game_title, players: extractPlayers(g.players), platform: g.platform, year: g.release_date?.slice(0,4), thumb };
+      });
+
+      state.allGames.push(...mapped);
+      renderCards(mapped);
+      
+      foundInThisBatch += mapped.length;
+      pagesChecked++;
+      state.currentPage++;
+
+      // Если мы искали конкретное имя, обычно результатов мало, выходим после 1 страницы
+      if (title) break;
+    }
+
+    updateInfo(`Найдено ${state.allGames.length} игр. Подгружаем детали...`);
+    enrichGames(state.allGames);
 
   } catch (err) {
-    alert('Ошибка API: ' + err.message);
+    alert('Ошибка: ' + err.message);
   } finally {
-    stopLoading();
+    setLoading(false);
   }
-};
+}
 
 function extractPlayers(val) {
   if (!val) return 1;
@@ -291,9 +322,9 @@ function findThumb(gid, data) {
 }
 
 /** ── Rendering ── **/
-function renderInitial(games) {
+function renderCards(games) {
   const grid = $('gameGrid');
-  grid.innerHTML = games.length ? '' : '<div class="empty-state">Ничего не найдено</div>';
+  if (state.allGames.length === games.length) grid.innerHTML = '';
   
   games.forEach(g => {
     const el = document.createElement('div');
@@ -318,38 +349,36 @@ function renderInitial(games) {
 }
 
 async function enrichGames(games) {
-  // Обрабатываем пачками по 5, чтобы не вешать браузер
-  for (let i = 0; i < games.length; i++) {
-    const g = games[i];
+  // Выбираем только те, что еще не обогащены (у которых нет рейтинга в DOM)
+  const toEnrich = games.filter(g => !document.querySelector(`#game-${g.id} .card-score`).textContent);
+  
+  for (let i = 0; i < toEnrich.length; i++) {
+    const g = toEnrich[i];
     fetchRAWG(g.title).then(data => {
       if (!data) return;
       const card = $(`game-${g.id}`);
       if (!card) return;
 
-      // Обновляем обложку на более качественную
-      if (data.background_image) {
-        card.querySelector('.card-img').src = data.background_image;
-      }
+      if (data.background_image) card.querySelector('.card-img').src = data.background_image;
 
-      // Добавляем рейтинг
       if (data.metacritic) {
         const score = card.querySelector('.card-score');
         score.textContent = data.metacritic;
         score.style.display = 'block';
-        score.classList.add(data.metacritic >= 75 ? 'score-high' : 'score-med');
+        score.className = 'card-score ' + (data.metacritic >= 75 ? 'score-high' : 'score-med');
       }
 
-      // Добавляем теги
       const tagContainer = card.querySelector('.card-tags');
-      const isCoop = data.tags?.some(t => ['co-op', 'local-co-op', 'split-screen'].includes(t.slug));
-      if (isCoop) {
-        const tag = document.createElement('span');
-        tag.className = 'tag';
-        tag.style.color = '#10b981';
-        tag.textContent = '🤝 CO-OP';
-        tagContainer.appendChild(tag);
+      if (data.tags?.some(t => ['co-op', 'local-co-op', 'split-screen'].includes(t.slug))) {
+        if (!tagContainer.innerHTML.includes('CO-OP')) {
+          const tag = document.createElement('span');
+          tag.className = 'tag'; tag.style.color = '#10b981'; tag.textContent = '🤝 CO-OP';
+          tagContainer.appendChild(tag);
+        }
       }
     });
+    // Небольшая задержка чтобы не спамить RAWG слишком сильно
+    if (i % 3 === 0) await new Promise(r => setTimeout(r, 100));
   }
 }
 
@@ -362,17 +391,10 @@ async function fetchRAWG(title) {
   } catch { return null; }
 }
 
-function startLoading() {
-  isLoading = true;
-  $('searchBtn').disabled = true;
-  $('searchBtn').textContent = '⏳ Поиск...';
-  $('gameGrid').innerHTML = Array(6).fill('<div class="skeleton"></div>').join('');
-}
-
-function stopLoading() {
-  isLoading = false;
-  $('searchBtn').disabled = false;
-  $('searchBtn').textContent = '🔍 Найти игры';
+function setLoading(val) {
+  state.isLoading = val;
+  $('searchBtn').disabled = val;
+  $('searchBtn').textContent = val ? '⏳ Ищем...' : '🔍 Найти больше';
 }
 
 function updateInfo(txt) { $('resultsInfo').textContent = txt; }
