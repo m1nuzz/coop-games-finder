@@ -434,23 +434,23 @@
 
 <!-- ── API Keys Modal ── -->
 <div class="modal-overlay" id="keysModal">
-  <div class="modal-card">
+  <form class="modal-card" id="keysForm">
     <h2>Настройка API</h2>
     <p>Введите ваши ключи. Они сохраняются <b>только</b> в вашем браузере (localStorage) и не передаются на сервер.</p>
     
     <div class="modal-input-group">
-      <label>TheGamesDB API Key</label>
-      <input type="password" id="tgdbInput" placeholder="Ваш ключ (api.thegamesdb.net)">
+      <label for="tgdbInput">TheGamesDB API Key</label>
+      <input type="password" id="tgdbInput" placeholder="Ваш ключ (api.thegamesdb.net)" required>
     </div>
     
     <div class="modal-input-group">
-      <label>RAWG API Key</label>
-      <input type="password" id="rawgInput" placeholder="Ваш ключ (rawg.io)">
+      <label for="rawgInput">RAWG API Key</label>
+      <input type="password" id="rawgInput" placeholder="Ваш ключ (rawg.io)" required>
     </div>
     
-    <button class="btn-save" id="saveKeysBtn">💾 Сохранить и закрыть</button>
-    <button class="btn-save" id="clearKeysBtn" style="background:var(--surface); border:1px solid var(--border); margin-top:.75rem; color:var(--muted)">🗑️ Очистить ключи</button>
-  </div>
+    <button type="submit" class="btn-save">💾 Сохранить и закрыть</button>
+    <button type="button" class="btn-save" id="clearKeysBtn" style="background:var(--surface); border:1px solid var(--border); margin-top:.75rem; color:var(--muted)">🗑️ Очистить ключи</button>
+  </form>
 </div>
 
 <div class="layout">
@@ -640,11 +640,26 @@ $('rawgInput').value = CONFIG.rawgKey;
 
 /* События модалки */
 $('openSettingsBtn').addEventListener('click', () => $('keysModal').classList.add('visible'));
-$('saveKeysBtn').addEventListener('click', () => {
-  saveKeys($('tgdbInput').value.trim(), $('rawgInput').value.trim());
+
+$('keysForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const tgdb = $('tgdbInput').value.trim();
+  const rawg = $('rawgInput').value.trim();
+  
+  if (tgdb && rawg) {
+    saveKeys(tgdb, rawg);
+    $('keysModal').classList.remove('visible');
+    // Опционально: запускаем поиск сразу после сохранения
+    if (state.games.length === 0) startSearch();
+  } else {
+    alert('Пожалуйста, введите оба ключа');
+  }
 });
+
 $('clearKeysBtn').addEventListener('click', () => {
-  if (confirm('Очистить сохранённые ключи?')) clearKeys();
+  if (confirm('Очистить сохранённые ключи?')) {
+    clearKeys();
+  }
 });
 
 /* Закрытие по клику вне карточки */
