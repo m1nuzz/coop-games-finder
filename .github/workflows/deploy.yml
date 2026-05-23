@@ -1,0 +1,44 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # позволяет запустить вручную из вкладки Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Подставляем ключи из Secrets прямо в HTML
+      - name: Inject API keys
+        run: |
+          sed -i "s|const THEGAMESDB_KEY = '';|const THEGAMESDB_KEY = '${{ secrets.THEGAMESDB_KEY }}';|g" retro-coop-games.html
+          sed -i "s|const RAWG_KEY = '';|const RAWG_KEY = '${{ secrets.RAWG_KEY }}';|g" retro-coop-games.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' # деплоим всю папку (там только один html)
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
