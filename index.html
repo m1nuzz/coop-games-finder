@@ -383,11 +383,15 @@ async function fetchGames() {
     removeSkeletons();
     
     // RAWG не умеет фильтровать по "количеству игроков" в запросе. 
-    // Нам приходится фильтровать на клиенте, используя данные о тегах или описании.
-    // Т.к. RAWG не отдает точное число игроков в списке, мы выводим всё, что нашли по тегам co-op.
-    renderCards(data.results);
+    // Фильтруем на клиенте
+    const filteredResults = data.results.filter(g => {
+      const maxEstimated = estimateMaxPlayers(g);
+      return maxEstimated >= minPlay;
+    });
+
+    renderCards(filteredResults);
     
-    $('resultsCount').innerHTML = `Найдено игр: <strong>${data.count}</strong>`;
+    $('resultsCount').innerHTML = `Найдено игр: <strong>${data.count}</strong> (показано ${filteredResults.length})`;
     if (state.nextUrl) $('btnMore').classList.add('visible');
     else $('btnMore').classList.remove('visible');
 
@@ -414,9 +418,9 @@ function renderCards(games) {
     const ratingClass = g.metacritic >= 75 ? 'score-green' : (g.metacritic >= 50 ? 'score-yellow' : 'score-none');
     const platforms = g.platforms?.map(p => p.platform.name).slice(0,2).join(', ') || 'Retro';
     
-    // Пытаемся угадать количество игроков из тегов
-    let playersInfo = "2+ игрока";
-    if (g.tags?.some(t => t.slug.includes('4-player'))) playersInfo = "4+ игрока";
+    // Используем нашу функцию оценки игроков
+    const maxPlayers = estimateMaxPlayers(g);
+    let playersInfo = maxPlayers > 2 ? `${maxPlayers}+ игроков` : "2+ игрока";
 
     card.innerHTML = `
       <img class="card-thumb" src="${g.background_image || ''}" alt="${g.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x225?text=No+Image'">
@@ -434,6 +438,19 @@ function renderCards(games) {
     `;
     $('gamesGrid').appendChild(card);
   });
+}
+
+function estimateMaxPlayers(g) {
+  const tags = (g.tags || []).map(t => t.slug.toLowerCase());
+  
+  if (tags.some(t => t.includes('8-player'))) return 8;
+  if (tags.some(t => t.includes('6-player'))) return 6;
+  if (tags.some(t => t.includes('4-player'))) return 4;
+  
+  // Если есть тег multiplayer или co-op, минимум 2
+  if (tags.some(t => ['co-op', 'multiplayer', 'local-co-op', 'online-co-op'].includes(t))) return 2;
+  
+  return 1; // По умолчанию 1, если ничего не нашли
 }
 
 function showSkeletons() {
