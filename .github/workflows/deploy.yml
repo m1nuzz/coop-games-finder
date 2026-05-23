@@ -14,9 +14,6 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -26,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v4 is fine, but we set FORCE_JAVASCRIPT_ACTIONS_TO_NODE24
+        uses: actions/checkout@v6
 
       - name: Inject API keys
         run: |
@@ -34,13 +31,13 @@ jobs:
           sed -i "s|const RAWG_KEY = '';|const RAWG_KEY = '${{ secrets.RAWG_KEY }}';|g" index.html
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: '.'
 
       - name: Deploy to GitHub Pages
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
