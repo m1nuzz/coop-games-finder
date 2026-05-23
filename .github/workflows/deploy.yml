@@ -17,24 +17,22 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # environment: github-pages # Убираем привязку к окружению, если секреты созданы как Repository Secrets
     
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Inject API keys
+      - name: Create Config File
         run: |
-          # Отладочная информация (безопасная)
-          echo "Checking if secrets are available..."
-          if [ -z "${{ secrets.THEGAMESDB_KEY }}" ]; then echo "THEGAMESDB_KEY is EMPTY"; else echo "THEGAMESDB_KEY is PRESENT"; fi
-          if [ -z "${{ secrets.RAWG_KEY }}" ]; then echo "RAWG_KEY is EMPTY"; else echo "RAWG_KEY is PRESENT"; fi
-
-          # Замена с использованием временных переменных для надежности
-          sed -i "s|const THEGAMESDB_KEY = '.*';|const THEGAMESDB_KEY = '${{ secrets.THEGAMESDB_KEY }}';|g" index.html
-          sed -i "s|const RAWG_KEY = '.*';|const RAWG_KEY = '${{ secrets.RAWG_KEY }}';|g" index.html
+          echo "window.ENV_CONFIG = {" > config.js
+          echo "  THEGAMESDB_KEY: '${{ secrets.THEGAMESDB_KEY }}'," >> config.js
+          echo "  RAWG_KEY: '${{ secrets.RAWG_KEY }}'" >> config.js
+          echo "};" >> config.js
           
-          echo "Injection complete."
+          # Отладочный вывод (безопасный)
+          echo "Config file created."
+          if [ -z "${{ secrets.THEGAMESDB_KEY }}" ]; then echo "WARNING: THEGAMESDB_KEY is EMPTY in GitHub Secrets"; fi
+          if [ -z "${{ secrets.RAWG_KEY }}" ]; then echo "WARNING: RAWG_KEY is EMPTY in GitHub Secrets"; fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
