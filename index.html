@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RetroCoOp — Масштабный поиск</title>
+<title>RetroCoOp — Глобальный поиск</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap');
   :root {
@@ -14,7 +14,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; overflow-x: hidden; }
 
-  .layout { display: grid; grid-template-columns: 300px 1fr; min-height: 100vh; }
+  .layout { display: grid; grid-template-columns: 320px 1fr; min-height: 100vh; }
   
   aside {
     background: var(--surface); border-right: 1px solid var(--border); padding: 1.5rem;
@@ -42,7 +42,6 @@
   .results-info { margin-bottom: 1.5rem; font-family: 'Space Mono', monospace; font-size: .75rem; color: var(--muted); border-left: 2px solid var(--accent); padding-left: 10px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
 
-  /* ── Card ── */
   .card {
     background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
     overflow: hidden; display: flex; flex-direction: column; transition: .2s; animation: fadeIn .3s ease both;
@@ -110,15 +109,17 @@
     <div class="filter-group">
       <label class="label">Platform</label>
       <select id="platform">
-        <option value="7,6,36,2,10,11,3,4">All Retro</option>
-        <option value="7">NES</option>
+        <option value="all">All Massive Retro</option>
+        <option value="2">Arcade (MAME)</option>
+        <option value="9">Wii</option>
+        <option value="11">GameCube</option>
+        <option value="15">Dreamcast</option>
+        <option value="10">PlayStation 1</option>
+        <option value="11">PlayStation 2</option>
+        <option value="3">N64</option>
+        <option value="7">NES / Dendy</option>
         <option value="6">SNES</option>
         <option value="36">Genesis</option>
-        <option value="2">Arcade</option>
-        <option value="10">PS1</option>
-        <option value="11">PS2</option>
-        <option value="3">N64</option>
-        <option value="4">GBA</option>
       </select>
     </div>
 
@@ -127,14 +128,14 @@
       <input type="number" id="minPlayers" value="2" min="1" max="16">
     </div>
 
-    <button class="btn-search" id="searchBtn">🔍 Start Precision Scan</button>
+    <button class="btn-search" id="searchBtn">🚀 Deep Global Scan</button>
     <div style="margin-top:2rem; display:flex;">
       <button class="btn-api" id="clearKeys">Reset Keys</button>
     </div>
   </aside>
 
   <main>
-    <div class="results-info" id="status">Ready to scan hundreds of games...</div>
+    <div class="results-info" id="status">Scanning thousands of records for multiplayer gems...</div>
     <div class="loader" id="mainLoader" style="display:none;"><div class="loader-bar"></div></div>
     <div class="grid" id="gameGrid"></div>
   </main>
@@ -161,7 +162,9 @@ const TGDB_BASE = 'https://api.thegamesdb.net/v1';
 const RAWG_BASE = 'https://api.rawg.io/api';
 const PROXY = 'https://corsproxy.io/?url=';
 
-const PLATFORM_NAMES = { '7':'NES','6':'SNES','36':'Genesis','2':'Arcade','10':'PS1','11':'PS2','3':'N64','4':'GBA' };
+const PLATFORMS = {
+  '2':'Arcade','9':'Wii','11':'GameCube','15':'Dreamcast','10':'PS1','11':'PS2','3':'N64','7':'NES','6':'SNES','36':'Genesis'
+};
 
 let state = { page: 1, loading: false, foundCount: 0 };
 
@@ -169,10 +172,10 @@ $('searchBtn').onclick = () => {
   state.page = 1;
   state.foundCount = 0;
   $('gameGrid').innerHTML = '';
-  startSearch();
+  startDeepSearch();
 };
 
-async function startSearch() {
+async function startDeepSearch() {
   if (state.loading) return;
   state.loading = true;
   $('searchBtn').disabled = true;
@@ -183,34 +186,42 @@ async function startSearch() {
   const minP = parseInt($('minPlayers').value) || 1;
 
   try {
-    // Цикл: сканируем пока не найдем 20 игр или не пройдем 15 страниц (300 игр)
-    while (state.foundCount < 20 && state.page < 15) {
-      updateStatus(`Scanning Page ${state.page} (Found: ${state.foundCount})...`);
+    // Если "All", будем опрашивать основные платформы по очереди в одном цикле
+    const platformList = platform === 'all' ? Object.keys(PLATFORMS) : [platform];
+    
+    // Глубокое сканирование: до 50 страниц (1000 игр)
+    while (state.foundCount < 40 && state.page < 50) {
+      updateStatus(`Deep Scanning Page ${state.page}... (Found ${state.foundCount} verified)`);
+      
+      // Чтобы не упереться в лимиты одной платформы, берем текущую из списка
+      const currentPid = platformList[state.page % platformList.length];
       
       let tgdbUrl = title 
         ? `${TGDB_BASE}/Games/ByGameName?name=${encodeURIComponent(title)}&page=${state.page}`
-        : `${TGDB_BASE}/Games/ByPlatformID?id=${platform}&page=${state.page}`;
+        : `${TGDB_BASE}/Games/ByPlatformID?id=${currentPid}&page=${Math.floor(state.page / platformList.length) + 1}`;
       
       tgdbUrl += `&apikey=${CONFIG.tgdb}&fields=players,release_date&include=boxart`;
       
       const res = await fetch(PROXY + encodeURIComponent(tgdbUrl));
       const json = await res.json();
-      if (json.status !== 'Success' || !json.data.games) break;
+      if (json.status !== 'Success' || !json.data.games) {
+         if (title) break; else { state.page++; continue; }
+      }
 
       const boxart = json.include?.boxart || {};
       const filtered = json.data.games.filter(g => extractPlayers(g.players) >= minP);
 
       filtered.forEach(g => {
-        renderCard(g, boxart);
-        state.foundCount++;
+        if (!$(`game-${g.id}`)) {
+          renderCard(g, boxart);
+          state.foundCount++;
+        }
       });
 
       state.page++;
-      if (title) break; // Для поиска по имени выходим сразу
+      if (title) break;
     }
-    updateStatus(`Found ${state.foundCount} games. Enhancing quality...`);
-    
-    // Фоновое улучшение (картинки и рейтинги из RAWG)
+    updateStatus(`Deep Scan Complete. Found ${state.foundCount} verified games. Loading HD covers...`);
     enhanceWithRAWG();
 
   } catch (err) { updateStatus(`Error: ${err.message}`); }
@@ -226,7 +237,7 @@ function renderCard(g, boxartData) {
   card.className = 'card';
   card.id = `game-${g.id}`;
   
-  let thumb = 'https://via.placeholder.com/300x400?text=No+Image';
+  let thumb = 'https://via.placeholder.com/300x400?text=Loading...';
   if (boxartData.data && boxartData.data[g.id]) {
     const img = boxartData.data[g.id].find(i => i.side === 'front') || boxartData.data[g.id][0];
     thumb = boxartData.base_url.thumb + img.filename;
@@ -239,7 +250,7 @@ function renderCard(g, boxartData) {
     </div>
     <div class="card-body">
       <div class="card-tags">
-        <span class="tag tag-platform">${PLATFORM_NAMES[g.platform] || 'Retro'}</span>
+        <span class="tag tag-platform">${PLATFORMS[g.platform] || 'Retro'}</span>
         <span class="tag">${g.release_date?.slice(0,4) || '????'}</span>
       </div>
       <div class="card-title">${g.game_title}</div>
@@ -250,27 +261,27 @@ function renderCard(g, boxartData) {
 }
 
 async function enhanceWithRAWG() {
-  const cards = document.querySelectorAll('.card');
-  for (const card of cards) {
+  const cards = Array.from(document.querySelectorAll('.card'));
+  // Обрабатываем пачками по 3 для скорости
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i];
     const id = card.id.replace('game-', '');
     const title = card.querySelector('.card-title').textContent;
     
-    try {
-      const url = `${RAWG_BASE}/games?key=${CONFIG.rawg}&search=${encodeURIComponent(title)}&page_size=1`;
-      const res = await fetch(url);
-      const data = await res.json();
-      const g = data.results?.[0];
-      
-      if (g) {
-        if (g.background_image) $(`img-${id}`).src = g.background_image;
-        if (g.metacritic) {
-          const s = $(`score-${id}`);
-          s.textContent = g.metacritic;
-          s.style.display = 'block';
+    fetch(`${RAWG_BASE}/games?key=${CONFIG.rawg}&search=${encodeURIComponent(title)}&page_size=1`)
+      .then(res => res.json())
+      .then(data => {
+        const g = data.results?.[0];
+        if (g) {
+          if (g.background_image) $(`img-${id}`).src = g.background_image;
+          if (g.metacritic) {
+            const s = $(`score-${id}`);
+            s.textContent = g.metacritic;
+            s.style.display = 'block';
+          }
         }
-      }
-    } catch {}
-    await new Promise(r => setTimeout(r, 150)); // Бережем лимиты
+      }).catch(()=>{});
+    if (i % 3 === 0) await new Promise(r => setTimeout(r, 200));
   }
 }
 
@@ -284,7 +295,7 @@ function updateStatus(msg) { $('status').textContent = msg; }
 
 window.onscroll = () => {
   if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 500) {
-    if (!state.loading && state.foundCount > 0) startSearch();
+    if (!state.loading && state.foundCount > 0) startDeepSearch();
   }
 };
 </script>
