@@ -161,7 +161,7 @@
   }
   .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 12px 40px rgba(0,0,0,.5); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  .card-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: var(--surface); }
+  .card-thumb { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: var(--surface); }
   .card-body { padding: 1rem; display: flex; flex-direction: column; gap: .5rem; flex: 1; }
   .card-title { font-size: .95rem; font-weight: 600; line-height: 1.3; }
   .card-meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
@@ -172,7 +172,7 @@
   .score-yellow { background: rgba(234,179,8,.15); color: var(--yellow); }
   .score-none { background: var(--surface); color: var(--muted); }
   .card-players { font-size: .8rem; color: var(--text); font-weight: 500; display: flex; align-items: center; gap: .4rem; }
-  .card-tags { font-size: .7rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: .3rem; }
+  .card-coop { font-size: .75rem; color: var(--accent); font-weight: 500; }
 
   /* ── States ── */
   .empty-state { display: none; flex-direction: column; align-items: center; padding: 4rem 1rem; text-align: center; }
@@ -185,7 +185,7 @@
   .btn-more:hover { border-color: var(--accent); background: var(--accent-glow); }
 
   /* ── Skeleton ── */
-  .skeleton { background: var(--card); border-radius: var(--radius); height: 320px; animation: shimmer 1.5s infinite linear; background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%); background-size: 200% 100%; }
+  .skel-card { background: var(--card); border-radius: var(--radius); height: 320px; animation: shimmer 1.5s infinite linear; background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%); background-size: 200% 100%; }
   @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 
   @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } aside { height: auto; position: static; } }
@@ -197,7 +197,7 @@
   <div class="header-inner">
     <div>
       <div class="logo">Retro<span>CoOp</span></div>
-      <div class="logo-sub">// найти во что поиграть с друзьями</div>
+      <div class="logo-sub">// поиск точного количества игроков в ретро-играх</div>
     </div>
     <button class="btn-settings" id="openSettingsBtn"><span>⚙️</span> Настройки API</button>
   </div>
@@ -207,13 +207,20 @@
   <form class="modal-card" id="keysForm">
     <input type="text" name="username" value="api-user" style="display:none;" autocomplete="username">
     <h2>Настройка ключей</h2>
-    <p>Ключи сохраняются локально в вашем браузере.</p>
+    <p>Для работы нужны оба ключа. Они сохраняются только в вашем браузере.</p>
+    
+    <div class="modal-input-group">
+      <label for="tgdbInput">TheGamesDB API Key</label>
+      <input type="password" id="tgdbInput" placeholder="Ключ от api.thegamesdb.net" required autocomplete="current-password">
+    </div>
+    
     <div class="modal-input-group">
       <label for="rawgInput">RAWG.io API Key</label>
-      <input type="password" id="rawgInput" placeholder="Ваш ключ (rawg.io/apidocs)" required autocomplete="current-password">
+      <input type="password" id="rawgInput" placeholder="Ключ от rawg.io" required autocomplete="current-password">
     </div>
+    
     <button type="submit" class="btn-save">💾 Сохранить и закрыть</button>
-    <button type="button" class="btn-save" id="clearKeysBtn" style="background:none; border:1px solid var(--border); margin-top:.75rem; color:var(--muted)">🗑️ Сбросить всё</button>
+    <button type="button" class="btn-save" id="clearKeysBtn" style="background:none; border:1px solid var(--border); margin-top:.75rem; color:var(--muted)">🗑️ Сбросить ключи</button>
   </form>
 </div>
 
@@ -229,20 +236,20 @@
     <div class="filter-group">
       <label class="filter-label">Платформа</label>
       <select id="platform">
-        <option value="">Все ретро-консоли</option>
-        <option value="49">NES (Dendy)</option>
-        <option value="79">SNES</option>
-        <option value="167">Sega Genesis</option>
-        <option value="21">Arcade</option>
-        <option value="27">PlayStation 1</option>
-        <option value="15">PlayStation 2</option>
-        <option value="83">Nintendo 64</option>
-        <option value="24">Game Boy Advance</option>
+        <option value="">Все платформы</option>
+        <option value="7">NES</option>
+        <option value="6">SNES</option>
+        <option value="36">Sega Genesis</option>
+        <option value="2">Arcade</option>
+        <option value="10">PS1</option>
+        <option value="11">PS2</option>
+        <option value="3">N64</option>
+        <option value="4">GBA</option>
       </select>
     </div>
 
     <div class="filter-group">
-      <label class="filter-label">Мин. игроков</label>
+      <label class="filter-label">Мин. игроков (точно)</label>
       <input type="number" id="minPlayers" value="2" min="1" max="16">
     </div>
 
@@ -257,10 +264,10 @@
     <div class="filter-group">
       <label class="filter-label">Сортировка</label>
       <select id="sortBy">
-        <option value="-rating">Рейтинг ↓</option>
-        <option value="-released">Новые ↓</option>
-        <option value="released">Старые ↑</option>
-        <option value="name">Название А–Я</option>
+        <option value="rating_desc">Рейтинг ↓</option>
+        <option value="year_desc">Новые ↓</option>
+        <option value="year_asc">Старые ↑</option>
+        <option value="name_asc">Название А–Я</option>
       </select>
     </div>
 
@@ -271,15 +278,15 @@
     <div class="error-banner" id="errorBanner"><span>❌</span><span id="errorText"></span></div>
     
     <div class="results-header">
-      <div class="results-count" id="resultsCount">Используйте фильтры слева</div>
+      <div class="results-count" id="resultsCount">Введите параметры и нажмите «Найти»</div>
     </div>
 
     <div class="games-grid" id="gamesGrid"></div>
 
     <div class="empty-state visible" id="emptyState">
-      <div class="empty-icon">🎮</div>
-      <div class="empty-title">Готов к поиску</div>
-      <div class="empty-sub">Введите название или выберите платформу</div>
+      <div class="empty-icon">🕹️</div>
+      <div class="empty-title">Готов к точному поиску</div>
+      <div class="empty-sub">Данные о игроках берутся из TheGamesDB</div>
     </div>
 
     <div class="load-more-wrap">
@@ -293,38 +300,55 @@
    Config & State
    ═══════════════════════════════════════════════════════ */
 const CONFIG = {
+  tgdbKey: localStorage.getItem('THEGAMESDB_KEY') || '',
   rawgKey: localStorage.getItem('RAWG_KEY') || ''
 };
 
 let state = {
+  games: [],
   page: 1,
-  loading: false,
-  nextUrl: null
+  totalPages: 1,
+  loading: false
 };
 
 const $ = id => document.getElementById(id);
+
+const PLATFORM_MAP = {
+  '7':  { name: 'NES', cls: 'nes' },
+  '6':  { name: 'SNES', cls: 'snes' },
+  '36': { name: 'Sega Genesis', cls: 'genesis' },
+  '2':  { name: 'Arcade', cls: 'arcade' },
+  '10': { name: 'PS1', cls: 'ps1' },
+  '11': { name: 'PS2', cls: 'ps2' },
+  '3':  { name: 'N64', cls: 'n64' },
+  '4':  { name: 'GBA', cls: 'gba' },
+};
 
 /* ═══════════════════════════════════════════════════════
    UI
    ═══════════════════════════════════════════════════════ */
 function updateKeyUI() {
-  if (!CONFIG.rawgKey) $('keysModal').classList.add('visible');
+  if (!CONFIG.tgdbKey || !CONFIG.rawgKey) $('keysModal').classList.add('visible');
   else $('keysModal').classList.remove('visible');
 }
 
 $('keysForm').addEventListener('submit', (e) => {
   e.preventDefault();
-  const key = $('rawgInput').value.trim();
-  if (key) {
-    localStorage.setItem('RAWG_KEY', key);
-    CONFIG.rawgKey = key;
+  const tgdb = $('tgdbInput').value.trim();
+  const rawg = $('rawgInput').value.trim();
+  if (tgdb && rawg) {
+    localStorage.setItem('THEGAMESDB_KEY', tgdb);
+    localStorage.setItem('RAWG_KEY', rawg);
+    CONFIG.tgdbKey = tgdb;
+    CONFIG.rawgKey = rawg;
     updateKeyUI();
     startSearch();
   }
 });
 
 $('clearKeysBtn').addEventListener('click', () => {
-  if (confirm('Сбросить ключ API?')) {
+  if (confirm('Сбросить ключи API?')) {
+    localStorage.removeItem('THEGAMESDB_KEY');
     localStorage.removeItem('RAWG_KEY');
     location.reload();
   }
@@ -333,71 +357,107 @@ $('clearKeysBtn').addEventListener('click', () => {
 $('openSettingsBtn').addEventListener('click', () => $('keysModal').classList.add('visible'));
 
 /* ═══════════════════════════════════════════════════════
-   Search Logic
+   Search Logic (TheGamesDB primary)
    ═══════════════════════════════════════════════════════ */
+const CORS_PROXY_BASE = 'https://corsproxy.io/?url=';
+const TGDB_BASE  = 'https://api.thegamesdb.net/v1';
+const RAWG_BASE  = 'https://api.rawg.io/api';
+
 async function startSearch() {
-  if (!CONFIG.rawgKey) { updateKeyUI(); return; }
+  if (!CONFIG.tgdbKey || !CONFIG.rawgKey) { updateKeyUI(); return; }
   state.page = 1;
+  state.games = [];
   $('gamesGrid').innerHTML = '';
   $('emptyState').classList.remove('visible');
   $('errorBanner').classList.remove('visible');
-  fetchGames();
+  fetchPage(1);
 }
 
-async function fetchPage() {
-  if (state.loading || !state.nextUrl) return;
+async function loadMore() {
+  if (state.loading || state.page >= state.totalPages) return;
   state.page++;
-  fetchGames();
+  fetchPage(state.page);
 }
 
-async function fetchGames() {
+async function fetchPage(page) {
   state.loading = true;
   $('btnSearch').disabled = true;
-  $('btnSearch').textContent = '⏳ Ищем...';
+  $('btnSearch').textContent = '⏳ Загрузка...';
   showSkeletons();
 
-  const query     = $('searchTitle').value.trim();
-  const platform  = $('platform').value;
-  const yearFrom  = $('yearFrom').value;
-  const yearTo    = $('yearTo').value;
-  const minPlay   = parseInt($('minPlayers').value) || 1;
-  const sort      = $('sortBy').value;
-
-  // RAWG API URL
-  let url = `https://api.rawg.io/api/games?key=${CONFIG.rawgKey}&page=${state.page}&page_size=24`;
-  
-  if (query) url += `&search=${encodeURIComponent(query)}&search_precise=true`;
-  if (platform) url += `&platforms=${platform}`;
-  if (yearFrom && yearTo) url += `&dates=${yearFrom}-01-01,${yearTo}-12-31`;
-  if (sort) url += `&ordering=${sort}`;
-  
-  // Добавляем теги для кооператива/мультиплеера, чтобы было больше шансов найти нужные игры
-  url += `&tags=co-op,multiplayer,local-co-op`;
+  const title    = $('searchTitle').value.trim();
+  const platform = $('platform').value;
+  const minPlay  = parseInt($('minPlayers').value) || 1;
+  const yearFrom = parseInt($('yearFrom').value) || 0;
+  const yearTo   = parseInt($('yearTo').value)   || 9999;
 
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Ошибка API: ${res.status}`);
-    const data = await res.json();
-    
-    state.nextUrl = data.next;
-    removeSkeletons();
-    
-    // RAWG не умеет фильтровать по "количеству игроков" в запросе. 
-    // Фильтруем на клиенте
-    const filteredResults = data.results.filter(g => {
-      const maxEstimated = estimateMaxPlayers(g);
-      return maxEstimated >= minPlay;
+    // 1. Fetch from TheGamesDB (for accurate players and list)
+    const url = new URL(`${TGDB_BASE}/Games/ByGameName`);
+    url.searchParams.set('apikey', CONFIG.tgdbKey);
+    url.searchParams.set('name', title || 'a'); 
+    url.searchParams.set('page', page);
+    url.searchParams.set('fields', 'players,release_date,overview');
+    url.searchParams.set('include','boxart');
+    if (platform) url.searchParams.set('filter[platform]', platform);
+    else url.searchParams.set('filter[platform]', Object.keys(PLATFORM_MAP).join(','));
+
+    const res = await fetch(CORS_PROXY_BASE + encodeURIComponent(url.toString()));
+    const json = await res.json();
+    if (json.status !== 'Success') throw new Error(json.status || 'Ошибка TGDB');
+
+    const data = json.data;
+    state.totalPages = Math.ceil((data.count || 0) / 20);
+
+    const boxartMap = {};
+    if (json.include?.boxart?.data) {
+      const ba = json.include.boxart.data;
+      const baseUrl = json.include.boxart.base_url?.thumb || '';
+      for (const gid in ba) {
+        const imgs = ba[gid];
+        const front = imgs.find(i => i.side === 'front') || imgs[0];
+        if (front) boxartMap[gid] = baseUrl + front.filename;
+      }
+    }
+
+    // 2. Filter TGDB results locally by exact players and years
+    const tgdbGames = (data.games || []).filter(g => {
+      const players = extractPlayers(g);
+      const year = g.release_date ? parseInt(g.release_date.slice(0,4)) : 0;
+      if (players < minPlay) return false;
+      if (year < yearFrom || year > yearTo) return false;
+      return true;
+    }).map(g => ({ ...g, _thumb: boxartMap[String(g.id)] || null }));
+
+    // 3. Enrich with RAWG (Parallel)
+    const rawgMap = await fetchRAWGBatch(tgdbGames.map(g => g.game_title));
+
+    // 4. Merge
+    const merged = tgdbGames.map(g => {
+      const r = rawgMap[normalizeTitle(g.game_title)] || {};
+      return {
+        id: g.id,
+        title: g.game_title,
+        year: g.release_date ? g.release_date.slice(0, 4) : null,
+        platform_id: String(g.platform),
+        players: extractPlayers(g),
+        thumb: g._thumb || null,
+        metacritic: r.metacritic || null,
+        coopType: extractCoop(r.tags || []),
+        description: r.description || null
+      };
     });
 
-    renderCards(filteredResults);
+    state.games.push(...merged);
+    sortGames();
+    removeSkeletons();
+    renderCards(merged);
+    updateCount();
     
-    $('resultsCount').innerHTML = `Найдено игр: <strong>${data.count}</strong> (показано ${filteredResults.length})`;
-    if (state.nextUrl) $('btnMore').classList.add('visible');
+    if (page < state.totalPages) $('btnMore').classList.add('visible');
     else $('btnMore').classList.remove('visible');
 
-    if (data.results.length === 0 && state.page === 1) {
-      $('emptyState').classList.add('visible');
-    }
+    if (state.games.length === 0 && page === 1) showEmpty();
 
   } catch (err) {
     removeSkeletons();
@@ -410,63 +470,96 @@ async function fetchGames() {
   }
 }
 
+async function fetchRAWGBatch(titles) {
+  if (!CONFIG.rawgKey) return {};
+  const map = {};
+  const requests = titles.map(async title => {
+    try {
+      const url = `${RAWG_BASE}/games?key=${CONFIG.rawgKey}&search=${encodeURIComponent(title)}&page_size=1`;
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const json = await res.json();
+      const g = json.results?.[0];
+      if (g) {
+        map[normalizeTitle(title)] = {
+          metacritic: g.metacritic || null,
+          tags: (g.tags || []).map(t => t.slug),
+          description: g.description_raw || null
+        };
+      }
+    } catch {}
+  });
+  await Promise.allSettled(requests);
+  return map;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Helpers
+   ═══════════════════════════════════════════════════════ */
+function normalizeTitle(s) { return s.toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+function extractPlayers(g) {
+  if (!g.players) return 1;
+  const m = String(g.players).match(/\d+/g);
+  return m ? Math.max(...m.map(Number)) : 1;
+}
+
+function extractCoop(tags) {
+  const coopTags = ['co-op', 'local-co-op', 'split-screen'];
+  if (tags.some(t => coopTags.includes(t))) return '🤝 Кооператив';
+  return null;
+}
+
+function sortGames() {
+  const by = $('sortBy').value;
+  state.games.sort((a, b) => {
+    if (by === 'rating_desc') return (b.metacritic || -1) - (a.metacritic || -1);
+    if (by === 'year_desc') return (b.year || 0) - (a.year || 0);
+    if (by === 'year_asc') return (a.year || 9999) - (b.year || 9999);
+    return a.title.localeCompare(b.title, 'ru');
+  });
+}
+
 function renderCards(games) {
   games.forEach(g => {
+    const pInfo = PLATFORM_MAP[g.platform_id] || { name: 'Other', cls: 'other' };
+    const ratingClass = g.metacritic >= 75 ? 'score-green' : (g.metacritic >= 50 ? 'score-yellow' : 'score-none');
+    
     const card = document.createElement('div');
     card.className = 'card';
-    
-    const ratingClass = g.metacritic >= 75 ? 'score-green' : (g.metacritic >= 50 ? 'score-yellow' : 'score-none');
-    const platforms = g.platforms?.map(p => p.platform.name).slice(0,2).join(', ') || 'Retro';
-    
-    // Используем нашу функцию оценки игроков
-    const maxPlayers = estimateMaxPlayers(g);
-    let playersInfo = maxPlayers > 2 ? `${maxPlayers}+ игроков` : "2+ игрока";
-
     card.innerHTML = `
-      <img class="card-thumb" src="${g.background_image || ''}" alt="${g.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/400x225?text=No+Image'">
+      <img class="card-thumb" src="${g.thumb || ''}" alt="${g.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="card-thumb-placeholder" style="display:none; height:240px; background:var(--surface); align-items:center; justify-content:center; font-size:3rem;">🕹️</div>
       <div class="card-body">
-        <div class="card-title">${g.name}</div>
+        <div class="card-title">${g.title}</div>
         <div class="card-meta">
-          <span class="badge badge-platform">${platforms}</span>
+          <span class="badge badge-platform">${pInfo.name}</span>
           ${g.metacritic ? `<span class="card-score ${ratingClass}">${g.metacritic}</span>` : ''}
         </div>
-        <div class="card-players">👥 ${playersInfo}</div>
-        <div class="card-tags">
-          ${g.tags?.filter(t => ['co-op', 'multiplayer', 'split-screen'].includes(t.slug)).slice(0,3).map(t => `<span>#${t.name}</span>`).join('')}
-        </div>
+        <div class="card-players">👥 до ${g.players} игроков</div>
+        ${g.coopType ? `<div class="card-coop">${g.coopType}</div>` : ''}
       </div>
     `;
     $('gamesGrid').appendChild(card);
   });
 }
 
-function estimateMaxPlayers(g) {
-  const tags = (g.tags || []).map(t => t.slug.toLowerCase());
-  
-  if (tags.some(t => t.includes('8-player'))) return 8;
-  if (tags.some(t => t.includes('6-player'))) return 6;
-  if (tags.some(t => t.includes('4-player'))) return 4;
-  
-  // Если есть тег multiplayer или co-op, минимум 2
-  if (tags.some(t => ['co-op', 'multiplayer', 'local-co-op', 'online-co-op'].includes(t))) return 2;
-  
-  return 1; // По умолчанию 1, если ничего не нашли
-}
-
 function showSkeletons() {
   for (let i = 0; i < 8; i++) {
     const s = document.createElement('div');
-    s.className = 'skeleton';
+    s.className = 'skel-card';
     $('gamesGrid').appendChild(s);
   }
 }
-
-function removeSkeletons() {
-  document.querySelectorAll('.skeleton').forEach(el => el.remove());
+function removeSkeletons() { document.querySelectorAll('.skel-card').forEach(el => el.remove()); }
+function showEmpty() { $('emptyState').classList.add('visible'); }
+function updateCount() {
+  const n = state.games.length;
+  $('resultsCount').innerHTML = n > 0 ? `Найдено: <strong>${n}</strong> игр` : 'Ничего не найдено';
 }
 
 $('btnSearch').addEventListener('click', startSearch);
-$('btnMore').addEventListener('click', fetchPage);
+$('btnMore').addEventListener('click', loadMore);
 updateKeyUI();
 </script>
 </body>
