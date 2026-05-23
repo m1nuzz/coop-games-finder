@@ -387,6 +387,9 @@
 <!-- ── API Keys Modal ── -->
 <div class="modal-overlay" id="keysModal">
   <form class="modal-card" id="keysForm">
+    <!-- Скрытое поле для доступности (Accessibility) -->
+    <input type="text" name="username" value="api-user" style="display:none;" autocomplete="username">
+    
     <h2>Настройка API</h2>
     <p>Введите ваши ключи. Они сохраняются <b>только</b> в вашем браузере (localStorage).</p>
     
