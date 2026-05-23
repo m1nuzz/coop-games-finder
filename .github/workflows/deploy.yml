@@ -22,18 +22,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Create Config File
-        run: |
-          echo "window.ENV_CONFIG = {" > config.js
-          echo "  THEGAMESDB_KEY: '${{ secrets.THEGAMESDB_KEY }}'," >> config.js
-          echo "  RAWG_KEY: '${{ secrets.RAWG_KEY }}'" >> config.js
-          echo "};" >> config.js
-          
-          # Отладочный вывод (безопасный)
-          echo "Config file created."
-          if [ -z "${{ secrets.THEGAMESDB_KEY }}" ]; then echo "WARNING: THEGAMESDB_KEY is EMPTY in GitHub Secrets"; fi
-          if [ -z "${{ secrets.RAWG_KEY }}" ]; then echo "WARNING: RAWG_KEY is EMPTY in GitHub Secrets"; fi
-
       - name: Setup Pages
         uses: actions/configure-pages@v6
 

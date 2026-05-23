@@ -411,15 +411,16 @@
   </main>
 </div>
 
-<script src="config.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════
- Константы
- ═══════════════════════════════════════════════════════ */
+   TODO: Вставьте ваши API-ключи ниже
+   ═══════════════════════════════════════════════════════ */
+const THEGAMESDB_KEY = ''; // TODO: ключ от https://api.thegamesdb.net
+const RAWG_KEY       = ''; // TODO: ключ от https://rawg.io/apidocs
 
-// Пытаемся взять ключи из внешнего конфига (для GitHub Pages) или оставляем пустыми (для локального запуска)
-const THEGAMESDB_KEY = window.ENV_CONFIG?.THEGAMESDB_KEY || ''; 
-const RAWG_KEY       = window.ENV_CONFIG?.RAWG_KEY       || ''; 
+/* ═══════════════════════════════════════════════════════
+   Константы
+   ═══════════════════════════════════════════════════════ */
 /* TheGamesDB не поддерживает CORS — запросы идут через corsproxy.io.
    Бесплатно без ключа для: localhost, github.io, CodePen и др.
    Документация: https://corsproxy.io */
